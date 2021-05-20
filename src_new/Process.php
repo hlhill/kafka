@@ -5,6 +5,8 @@ namespace EasySwoole\Kafka1;
 
 use EasySwoole\Kafka1\Config\Config;
 use EasySwoole\Kafka1\Exception\ConnectionException;
+use EasySwoole\Kafka1\Exception\Exception;
+use EasySwoole\Kafka1\Protocol\Metadata;
 use EasySwoole\Kafka1\Protocol\Protocol;
 
 class Process
@@ -19,16 +21,39 @@ class Process
      */
     protected $broker;
 
+    /**
+     * @var Protocol
+     */
+    protected $protocol;
 
-    public function __construct()
+
+    public function __construct(Config $config)
     {
+        $this->setConfig($config);
 
+        Protocol::init($this->config->getBrokerVersion());
+    }
+
+    /**
+     * @return Config|mixed
+     */
+    protected function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param Config $config
+     */
+    public function setConfig(Config $config): void
+    {
+        $this->config = $config;
     }
 
     /**
      * @return mixed
      * @throws ConnectionException
-     * @throws Exception\Exception
+     * @throws Exception
      */
     public function syncMeta()
     {
@@ -60,14 +85,14 @@ class Process
 
             $params = [];
 
-            $requestData = Protocol::encode(Protocol::METADATA_REQUEST, $params);
+            $requestData = Metadata::encode($params);
             $data = $client->send($requestData);
-            $dataLen = Protocol\Protocol::unpack(Protocol\Protocol::BIT_B32, substr($data, 0, 4));
-            $correlationId = Protocol\Protocol::unpack(Protocol\Protocol::BIT_B32, substr($data, 4, 4));
+            $dataLen = Protocol::unpack(Protocol::BIT_B32, substr($data, 0, 4));
+            $correlationId = Protocol::unpack(Protocol::BIT_B32, substr($data, 4, 4));
             // 0-4字节是包头长度
             // 4-8字节是correlationId
-            $result = Protocol::decode(Protocol::METADATA_REQUEST, substr($data, 8));
-            if (! isset($result['brokers'], $result['topics'])) {
+            $result = Metadata::decode(substr($data, 8));
+            if (!isset($result['brokers'], $result['topics'])) {
                 throw new Exception("Get metadata is fail, brokers or topics is null.");
             }
 
