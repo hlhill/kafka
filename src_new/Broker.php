@@ -75,11 +75,30 @@ class Broker
         $this->config = $config;
     }
 
+    public function __construct($config = null)
+    {
+        if (!is_null($config)) {
+            $this->config = $config;
+        }
+    }
+
+
+    public function getConnect(){}
+
+    public function getRandConnect(){}
+
+    public function getClient(){}
+
+    public function getMetaConnect(){}
+
+
+
     /**
      * @param array $topics
      * @param array $brokersResult
      * @return bool
      * @throws Exception\ErrorCodeException
+     * 设置broker
      */
     public function setData(array $topics, array $brokersResult): bool
     {

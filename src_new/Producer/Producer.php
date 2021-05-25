@@ -2,9 +2,18 @@
 
 namespace EasySwoole\Kafka1\Producer;
 
-use EasySwoole\Kafka1\Process;
-
-class Producer extends Process
+class Producer
 {
+    protected $client;
 
+    protected $protocol;
+
+    protected $ack;
+
+    public function send(){}
+
+    protected function convertRecordSet(array $recordSet): array
+    {
+
+    }
 }

@@ -8,12 +8,6 @@ use EasySwoole\Kafka1\Exception\Protocol as ProtocolException;
 
 class Protocol
 {
-
-    /**
-     * @var static
-     */
-    protected $instance;
-
     /**
      * protocol request code
      */
@@ -231,14 +225,86 @@ class Protocol
         82 => 'The broker rejected this static consumer since another consumer with the same group.instance.id has registered with a different member.id.',
     ];
 
+    private static $objMap = [
+        self::PRODUCE_REQUEST           => Produce::class,
+        self::METADATA_REQUEST          => Metadata::class,
+        self::FETCH_REQUEST             => Fetch::class,
+        self::OFFSET_REQUEST            => Offset::class,
+        self::OFFSET_COMMIT_REQUEST     => CommitOffset::class,
+        self::OFFSET_FETCH_REQUEST      => FetchOffset::class,
+        self::GROUP_COORDINATOR_REQUEST => GroupCoordinator::class,
+        self::JOIN_GROUP_REQUEST        => JoinGroup::class,
+        self::HEART_BEAT_REQUEST        => HeartBeat::class,
+        self::LEAVE_GROUP_REQUEST       => LeaveGroup::class,
+        self::SYNC_GROUP_REQUEST        => SyncGroup::class,
+        self::DESCRIBE_GROUPS_REQUEST   => DescribeGroups::class,
+        self::LIST_GROUPS_REQUEST       => ListGroup::class,
+        self::SASL_HAND_SHAKE_REQUEST   => SaslHandShake::class,
+        self::API_VERSIONS_REQUEST      => ApiVersions::class,
+    ];
+
+    /**
+     * @var array
+     */
+    private $objList = [];
+
+    /**
+     * @param $key
+     * @param $payloads
+     * @return mixed
+     * @throws ProtocolException
+     */
+    public function encode($key, $payloads)
+    {
+        if (!isset(self::$objMap[$key])) {
+            throw new ProtocolException('undefined protocol type : '. $key);
+        }
+
+        if (!isset($this->objList[$key])) {
+            $this->objList[$key] = new self::$objMap[$key]();
+        }
+
+        return $this->objList[$key]->encoding($payloads);
+    }
+
+    /**
+     * @param $key
+     * @param $data
+     * @return mixed
+     * @throws ProtocolException
+     */
+    public function decode($key, $data)
+    {
+        if (!isset(self::$objMap[$key])) {
+            throw new ProtocolException('undefined protocol type : '. $key);
+        }
+
+        if (!isset($this->objList[$key])) {
+            $this->objList[$key] = new self::$objMap[$key]();
+        }
+
+        return $this->objList[$key]->decoding($data);
+    }
+
     /**
      * @param array $payloads
      * @return string
      * @throws Exception
      */
-    public function encode(array $payloads): string
+    protected function encoding(array $payloads): string
     {
+        foreach ($payloads as $topic) {
+            if (! is_string($topic)) {
+                throw new ProtocolException(
+                    "request metadata topic array have invalid value."
+                );
+            }
+        }
 
+        $header = $this->requestHeader('Easyswoole-kafka', self::METADATA_REQUEST, self::METADATA_REQUEST);
+        $data   = self::encodeArray($payloads, [$this, 'encodeString'], self::PACK_INT16);
+        $data   = self::encodeString($header . $data, self::PACK_INT32);
+        return $data;
     }
 
     /**
@@ -246,9 +312,19 @@ class Protocol
      * @return array
      * @throws Exception
      */
-    public function decode(string $data): array
+    protected function decoding(string $data): array
     {
+        $offset       = 0;
+        $brokerRet    = $this->decodeArray(substr($data, $offset), [$this, 'metaBroker']);
+        $offset      += $brokerRet['length'];
+        $topicMetaRet = $this->decodeArray(substr($data, $offset), [$this, 'metaTopicMetaData']);
+        $offset      += $topicMetaRet['length'];
 
+        $result = [
+            'brokers' => $brokerRet['data'],
+            'topics'  => $topicMetaRet['data'],
+        ];
+        return $result;
     }
 
     /**
