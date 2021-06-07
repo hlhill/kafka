@@ -1,6 +1,6 @@
 <?php
 
-namespace EasySwoole\Kafka1\Exception;
+namespace EasySwoole\Kafka2\Exception;
 
 class Exception extends \Exception
 {
