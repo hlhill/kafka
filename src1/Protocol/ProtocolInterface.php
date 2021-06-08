@@ -9,4 +9,6 @@ interface ProtocolInterface
     public function encode();
 
     public function decode();
+
+    public function requiredVersion();
 }

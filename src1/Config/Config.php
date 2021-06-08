@@ -30,6 +30,11 @@ class Config
 
     public $version = V1_0_0_0;
 
+    /**
+     * @var NetConfig
+     */
+    public $net;
+
 
     public static function NewConfig()
     {

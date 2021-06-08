@@ -137,7 +137,7 @@ class Client
             } else if (KafkaVersion::isAtLeast($this->config->version, V0_10_0_0)) {
                 $request->version = 1;
             }
-            $response = $broker->GetMetadata($request);
+            $response = $broker->getMetadata($request);
         }
 
         return $retry(new OutOfBrokerException('kafka: client has run out of available brokers to talk to (Is your cluster reachable?)'));
