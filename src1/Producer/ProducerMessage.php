@@ -10,4 +10,6 @@ class ProducerMessage
      * @var int
      */
     public $partition;
+
+    public $key;
 }

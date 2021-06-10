@@ -15,4 +15,12 @@ class PartitionManager
         };
         return $partitioner;
     }
+
+    public static function newHashPartitioner(string $topic)
+    {
+        $partition = new HashPartitioner();
+        $partition->random = self::newRandomPartitioner($topic);
+        $partition->referenceAbs = false;
+        return $partition;
+    }
 }
