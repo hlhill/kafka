@@ -4,6 +4,8 @@
 namespace EasySwoole\Kafka2\Producer;
 
 
+use EasySwoole\Kafka2\Partitioner\Partitioner;
+
 class TopicProducer
 {
     public $topic;
@@ -15,5 +17,22 @@ class TopicProducer
 
     public $handlers;
 
+    public $breaker;
+
+    /**
+     * @var Partitioner
+     */
     public $partitioner;
+
+    public function partitionMessage(ProducerMessage $message)
+    {
+        $partitions = [];
+
+        try {
+
+        }catch (\Throwable $throwable) {
+            
+        }
+    }
+
 }
