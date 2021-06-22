@@ -84,6 +84,8 @@ class Breaker
             return null;
         }
 
+
+
         if (!is_null($panicValue)) {
             throw new Exception($panicValue);
         }
@@ -91,5 +93,5 @@ class Breaker
         return $result;
     }
 
-    private function processResult(){}
+    private function processResult($result, $panicValue){}
 }

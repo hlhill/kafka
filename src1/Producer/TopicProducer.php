@@ -31,7 +31,7 @@ class TopicProducer
         try {
 
         }catch (\Throwable $throwable) {
-            
+
         }
     }
 
