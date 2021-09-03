@@ -14,11 +14,19 @@ class NetConfig
 
     public $readTimeout;
 
+    /**
+     * @var
+     */
     public $tls;
 
     /**
      * @var SaslConfig
      */
     public $sasl;
+
+    /**
+     * @var ProxyConfig
+     */
+    public $proxy;
 
 }

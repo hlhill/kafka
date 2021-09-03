@@ -6,6 +6,9 @@ namespace EasySwoole\Kafka2\Config;
 
 class SaslConfig
 {
+    /**
+     * @var boolean
+     */
     public $enable;
 
     public $mechanism;
